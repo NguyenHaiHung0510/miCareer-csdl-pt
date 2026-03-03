@@ -144,9 +144,10 @@ CREATE TABLE HR (
     FOREIGN KEY (posId) REFERENCES HRPosition (posId)
 );
 
-CREATE TABLE Admin (
+CREATE TABLE [Admin] (
     adminId UNIQUEIDENTIFIER PRIMARY KEY,
-    lastIp VARCHAR(80), -- Mặc dù 45 ký tự là đủ để lưu cả IPv4 và IPv6 nhưng dự trù tới 80 ký tự cho cả những cập nhật trong tương lai (nếu có)
+    lastIp VARCHAR(80), -- Mặc dù 45 ký tự là đủ để lưu cả IPv4 và IPv6 nhưng được dự trù tới 80 ký tự
+                        -- cho cả những cập nhật trong tương lai (nếu có)
     roleId UNIQUEIDENTIFIER,
 
     FOREIGN KEY (adminId) REFERENCES [User] (userId),
