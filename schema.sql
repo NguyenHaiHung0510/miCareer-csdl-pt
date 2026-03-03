@@ -199,19 +199,19 @@ CREATE TABLE JobApplication (
     coverLetter NVARCHAR(MAX),
 
     FOREIGN KEY (jobPostId) REFERENCES JobPosting (jobPostId),
-    FOREIGN KEY (candidateId) REFERENCES Candidate (userId)
+    FOREIGN KEY (candidateId) REFERENCES Candidate (candidateId)
 );
 
 CREATE TABLE AppStatusHistory (
     histId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     jobAppId UNIQUEIDENTIFIER NOT NULL,
-    hrId UNIQUEIDENTIFIER NOT NULL,
+    userId UNIQUEIDENTIFIER NOT NULL,
     oldStat VARCHAR(30),
     newStat VARCHAR(30),
     changeAt DATETIME2(0) DEFAULT SYSDATETIME(),
     
     FOREIGN KEY (jobAppId) REFERENCES JobApplication (jobAppId),
-    FOREIGN KEY (hrId) REFERENCES HR (userId)
+    FOREIGN KEY (userId) REFERENCES HR (userId)
 );
 
 CREATE TABLE Interview (
@@ -235,7 +235,7 @@ CREATE TABLE InterviewFeedback (
     subAt DATETIME2(0) DEFAULT SYSDATETIME(),
 
     FOREIGN KEY (intervId) REFERENCES Interview (intervId),
-    FOREIGN KEY (hrId) REFERENCES HR (userId)
+    FOREIGN KEY (hrId) REFERENCES HR (hrId)
 );
 
 CREATE TABLE Offer (
@@ -246,9 +246,9 @@ CREATE TABLE Offer (
     stat VARCHAR(30),
     subAt DATETIME2(0) DEFAULT SYSDATETIME(),
     ver INT NOT NULL,
-    -- hrId UNIQUEIDENTIFIER NOT NULL,
+    hrId UNIQUEIDENTIFIER NOT NULL,
 
-    --FOREIGN KEY (hrId) REFERENCES HR (hrID),
+    FOREIGN KEY (hrId) REFERENCES HR (hrId),
     FOREIGN KEY (jobAppId) REFERENCES JobApplication (jobAppId)
 );
 
