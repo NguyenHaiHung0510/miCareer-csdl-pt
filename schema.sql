@@ -97,7 +97,7 @@ CREATE TABLE [User] (
     fName NVARCHAR(50) NOT NULL,
     lName NVARCHAR(50) NOT NULL,
 
-    email VARCHAR(300) NOT NULL UNIQUE,
+    email VARCHAR(400) NOT NULL UNIQUE,
     phone VARCHAR(20) UNIQUE,
     stat VARCHAR(30) NOT NULL,
     [role] VARCHAR(30) NOT NULL,
@@ -116,7 +116,7 @@ CREATE TABLE Company (
     taxCode VARCHAR(20) NOT NULL UNIQUE,
     webUrl VARCHAR(500),
     logoUrl VARCHAR(500),
-    contactEmail VARCHAR(300),
+    contactEmail VARCHAR(400),
     
     provId VARCHAR(10), 
     ward NVARCHAR(80),
@@ -259,7 +259,7 @@ CREATE TABLE EmailLog (
     userId UNIQUEIDENTIFIER NOT NULL,
     content NVARCHAR(MAX) NOT NULL,
     sentAt DATETIME2(0) DEFAULT SYSDATETIME(),
-    rcvEmail VARCHAR(300) NOT NULL,
+    rcvEmail VARCHAR(400) NOT NULL,
     
     FOREIGN KEY (tmplId) REFERENCES EmailTemplate (tmplId),
     FOREIGN KEY (jobAppId) REFERENCES JobApplication (jobAppId),
