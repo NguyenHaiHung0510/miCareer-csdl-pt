@@ -211,7 +211,7 @@ CREATE TABLE AppStatusHistory (
     changeAt DATETIME2(0) DEFAULT SYSDATETIME(),
     
     FOREIGN KEY (jobAppId) REFERENCES JobApplication (jobAppId),
-    FOREIGN KEY (userId) REFERENCES HR (userId)
+    FOREIGN KEY (userId) REFERENCES [User] (userId)
 );
 
 CREATE TABLE Interview (
