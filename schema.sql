@@ -26,7 +26,7 @@ GO
 CREATE TABLE HRPosition (
     posId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     posName NVARCHAR(50) NOT NULL UNIQUE,
-    [desc] NVARCHAR(MAX)
+    [desc] NVARCHAR(500)
 );
 
 -- Bảng AdminRole: Vai trò của Admin
@@ -34,156 +34,133 @@ CREATE TABLE AdminRole (
     roleId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     -- Quy ước tên vai trò Admin trong hệ thống sẽ là mã, không có dấu
     roleName VARCHAR(50) NOT NULL UNIQUE,
-    [desc] NVARCHAR(MAX)
+    [desc] NVARCHAR(500)
 );
 
--- Bảng Permission: Quyền hạn hệ thống
+-- Bảng Permission: Các quyền trong hệ thống của Admin
 CREATE TABLE Permission (
     permId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     permCode VARCHAR(50) NOT NULL UNIQUE,
-    [desc] NVARCHAR(MAX)
+    [desc] NVARCHAR(500)
 );
 
--- Bảng Skill: Danh mục kỹ năng
+-- Bảng Skill: Danh mục các kỹ năng của ứng viên
 CREATE TABLE Skill (
     skillId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     skillName NVARCHAR(50) NOT NULL UNIQUE,
-    [desc] NVARCHAR(MAX)
+    [desc] NVARCHAR(500)
 );
 
 -- Bảng EmailType: Loại email
 CREATE TABLE EmailType (
     typeId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     typeName NVARCHAR(50) NOT NULL UNIQUE,
-    [desc] NVARCHAR(MAX)
+    [desc] NVARCHAR(500)
 );
 
--- Bảng Province: Danh mục Tỉnh/Thành phố (BẢNG MỚI NÂNG CẤP)
--- Phục vụ ánh xạ Node cho CSDL phân tán
+-- Bảng Province: Danh mục Tỉnh/Thành phố trực thuộc TW
+-- Bảng này cũng chứa ánh xạ Node cho CSDL phân tán
 CREATE TABLE Province (
-    -- VARCHAR(10): Mã tỉnh là chữ không dấu (VD: 'HN', 'HCM'), chỉ cần 10 ký tự là đủ.
-    -- Không dùng UUID vì dữ liệu tỉnh thành là tĩnh, ít thay đổi, mã tự đặt sẽ dễ quản lý hơn.
+    -- provId ở đây không cần sử dụng UUID vì danh mục Tỉnh là tĩnh (tạm tính cho 20-30 năm)
     provId VARCHAR(10) PRIMARY KEY,
-    
-    provName NVARCHAR(50) NOT NULL UNIQUE,
-    
-    -- VARCHAR(30): Mã Node quản lý (VD: 'HANOI_NODE'). 30 ký tự là dư dả.
+    provName NVARCHAR(80) NOT NULL UNIQUE,
+    -- Mã Node quản lý thông tin từ Tỉnh này
     nodeCode VARCHAR(30) NOT NULL
 );
 
--- =============================================
--- 3. TẠO CÁC BẢNG CÓ QUAN HỆ CẤP 1 (PHỤ THUỘC VÀO CÁC BẢNG TRÊN)
--- =============================================
-
--- Bảng RolePermission: Phân quyền (Bảng trung gian N-N)
+-- 3. Các bảng nghiệp vụ
+-- Bảng RolePermission: Bảng ánh xạ AdminRole với các quyền tương ứng trong Permission
 CREATE TABLE RolePermission (
-    roleId UNIQUEIDENTIFIER,
-    permId UNIQUEIDENTIFIER,
-    -- Khóa chính kép: Kết hợp cả 2 cột để tạo thành 1 định danh duy nhất (1 role không thể có 2 quyền giống hệt nhau).
+    roleId UNIQUEIDENTIFIER NOT NULL,
+    permId UNIQUEIDENTIFIER NOT NULL,
+
     PRIMARY KEY (roleId, permId),
-    -- Khóa ngoại: Ràng buộc tính toàn vẹn dữ liệu, roleId phải tồn tại trong bảng AdminRole.
     FOREIGN KEY (roleId) REFERENCES AdminRole (roleId),
     FOREIGN KEY (permId) REFERENCES Permission (permId)
 );
 
--- Bảng EmailTemplate: Mẫu Email
+-- Bảng EmailTemplate: Các mẫu Email
 CREATE TABLE EmailTemplate (
     tmplId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    typeId UNIQUEIDENTIFIER,
-    -- NVARCHAR(200): Tiêu đề email thường không quá dài, 200 ký tự là chuẩn.
+    typeId UNIQUEIDENTIFIER NOT NULL,
     subj NVARCHAR(200),
     body NVARCHAR(MAX),
-    [desc] NVARCHAR(MAX),
+    [desc] NVARCHAR(500),
+
     FOREIGN KEY (typeId) REFERENCES EmailType (typeId)
 );
 
--- Bảng User: Bảng cha quản lý thông tin đăng nhập (CẬP NHẬT TỈNH THÀNH)
 CREATE TABLE [User] (
     userId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     userName VARCHAR(50) NOT NULL UNIQUE,
-    -- Mật khẩu đã hash thường dài nên để VARCHAR(255). Không dùng NVARCHAR vì password sinh ra là các ký tự mã hóa Latin.
-    pwd VARCHAR(255) NOT NULL,
+    pwd VARCHAR(300) NOT NULL,  -- Dự trù cho việc băm mật khẩu
     fName NVARCHAR(50) NOT NULL,
     lName NVARCHAR(50) NOT NULL,
-    email VARCHAR(100) NOT NULL UNIQUE,
+
+    email VARCHAR(300) NOT NULL UNIQUE,
     phone VARCHAR(20) UNIQUE,
     stat VARCHAR(30) NOT NULL,
     [role] VARCHAR(30) NOT NULL,
     
-    -- Thay NVARCHAR(50) bằng VARCHAR(10) để tham chiếu tới bảng Province
     provId VARCHAR(10), 
-    ward NVARCHAR(50),
-    street NVARCHAR(100),
-    
-    -- DATETIME2(0): Kiểu thời gian lưu cả ngày lẫn giờ. Số (0) nghĩa là lấy độ chính xác tới đơn vị Giây (không lấy phần nghìn giây).
-    -- DEFAULT GETDATE(): Tự động lấy ngày giờ hiện tại của hệ thống máy chủ SQL lúc chèn dữ liệu.
+    ward NVARCHAR(80),
+    street NVARCHAR(150),    
     createdAt DATETIME2(0) DEFAULT GETDATE(),
     
-    -- Ràng buộc khóa ngoại cho Tỉnh/Thành
     FOREIGN KEY (provId) REFERENCES Province (provId)
 );
 
--- Bảng Company: Thông tin doanh nghiệp (CẬP NHẬT TỈNH THÀNH)
 CREATE TABLE Company (
     compId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    compName NVARCHAR(100) NOT NULL,
+    compName NVARCHAR(200) NOT NULL,
     taxCode VARCHAR(20) NOT NULL UNIQUE,
-    webUrl VARCHAR(255),
-    logoUrl VARCHAR(255),
-    contactEmail VARCHAR(100),
+    webUrl VARCHAR(500),
+    logoUrl VARCHAR(500),
+    contactEmail VARCHAR(300),
     
-    -- Thay NVARCHAR(50) bằng VARCHAR(10) để làm khóa ngoại
     provId VARCHAR(10), 
-    ward NVARCHAR(50),
-    street NVARCHAR(100),
+    ward NVARCHAR(80),
+    street NVARCHAR(150),
     
     FOREIGN KEY (provId) REFERENCES Province (provId)
 );
 
--- =============================================
--- 4. TẠO CÁC BẢNG LIÊN QUAN ĐẾN USER (CANDIDATE, HR, ADMIN)
--- =============================================
-
 CREATE TABLE Candidate (
-    -- Dùng chung userId từ bảng User làm khóa chính, thể hiện quan hệ 1-1.
-    userId UNIQUEIDENTIFIER PRIMARY KEY,
+    candidateId UNIQUEIDENTIFIER PRIMARY KEY,
     bio NVARCHAR(MAX),
-    cvUrl VARCHAR(255),
-    -- DATE: Chỉ lưu ngày tháng năm sinh (không cần giờ phút).
+    cvUrl VARCHAR(500),
     dob DATE,
-    -- NUMERIC(4,1): Kiểu số thực. Tổng cộng có 4 chữ số, trong đó có 1 chữ số thập phân (VD: 999.5 năm kinh nghiệm).
+    -- Số năm kinh nghiệp được lưu dạng số thực. dự trù có 4 chữ số, trong đó có 1 chữ số thập phân (MAX = 999,9)
     expYears NUMERIC(4, 1),
-    FOREIGN KEY (userId) REFERENCES [User] (userId)
+    FOREIGN KEY (candidateId) REFERENCES [User] (userId)
 );
 
 CREATE TABLE HR (
-    userId UNIQUEIDENTIFIER PRIMARY KEY,
+    hrId UNIQUEIDENTIFIER PRIMARY KEY,
     posId UNIQUEIDENTIFIER,
-    emailSign NVARCHAR(MAX),
-    FOREIGN KEY (userId) REFERENCES [User] (userId),
+    emailSign NVARCHAR(500),
+
+    FOREIGN KEY (hrId) REFERENCES [User] (userId),
     FOREIGN KEY (posId) REFERENCES HRPosition (posId)
 );
 
 CREATE TABLE Admin (
-    userId UNIQUEIDENTIFIER PRIMARY KEY,
-    lastIp VARCHAR(45), -- 45 ký tự là đủ để lưu cả IPv4 và IPv6.
+    adminId UNIQUEIDENTIFIER PRIMARY KEY,
+    lastIp VARCHAR(80), -- Mặc dù 45 ký tự là đủ để lưu cả IPv4 và IPv6 nhưng dự trù tới 80 ký tự cho cả những cập nhật trong tương lai (nếu có)
     roleId UNIQUEIDENTIFIER,
-    FOREIGN KEY (userId) REFERENCES [User] (userId),
+
+    FOREIGN KEY (adminId) REFERENCES [User] (userId),
     FOREIGN KEY (roleId) REFERENCES AdminRole (roleId)
 );
 
--- Bảng CandidateSkill (Bảng trung gian N-N)
+-- Bảng CandidateSkill: Bảng trung gian ánh xạ Candidate - Skill
 CREATE TABLE CandidateSkill (
-    userId UNIQUEIDENTIFIER,
+    candidateId UNIQUEIDENTIFIER,
     skillId UNIQUEIDENTIFIER,
-    PRIMARY KEY (userId, skillId),
-    FOREIGN KEY (userId) REFERENCES Candidate (userId),
+    PRIMARY KEY (candidateId, skillId),
+    FOREIGN KEY (candidateId) REFERENCES Candidate (candidateId),
     FOREIGN KEY (skillId) REFERENCES Skill (skillId)
 );
-
--- =============================================
--- 5. TẠO CÁC BẢNG NGHIỆP VỤ CỐT LÕI (TUYỂN DỤNG, ỨNG TUYỂN, EMAIL)
--- =============================================
 
 CREATE TABLE JobPosting (
     jobPostId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
@@ -191,20 +168,22 @@ CREATE TABLE JobPosting (
     title NVARCHAR(150) NOT NULL,
     [desc] NVARCHAR(MAX) NOT NULL,
     
-    -- NUMERIC(15,2): Số lưu tiền tệ cực tốt. Tổng 15 chữ số, lấy 2 số sau dấu phẩy (VD: 9,999,999,999,999.99).
     minSalary NUMERIC(15,2),
     maxSalary NUMERIC(15,2),
     
-    workLoc NVARCHAR(100),
+    workLoc NVARCHAR(150),
     workMode VARCHAR(30),
-    createdAt DATETIME2(0) DEFAULT GETDATE(),
+    createdAt DATETIME2(0) DEFAULT SYSDATETIME(),
     expAt DATETIME2(0) NOT NULL,
+    
     FOREIGN KEY (compId) REFERENCES Company (compId)
 );
 
+-- Bảng JobRequirement: ánh xạ giữa JobPosting và Skill (N - N)
 CREATE TABLE JobRequirement (
     jobPostId UNIQUEIDENTIFIER,
     skillId UNIQUEIDENTIFIER,
+
     PRIMARY KEY (jobPostId, skillId),
     FOREIGN KEY (jobPostId) REFERENCES JobPosting (jobPostId),
     FOREIGN KEY (skillId) REFERENCES Skill (skillId)
@@ -212,58 +191,64 @@ CREATE TABLE JobRequirement (
 
 CREATE TABLE JobApplication (
     jobAppId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    jobPostId UNIQUEIDENTIFIER,
-    candidateId UNIQUEIDENTIFIER,
-    appliedAt DATETIME2(0) DEFAULT GETDATE(),
+    jobPostId UNIQUEIDENTIFIER NOT NULL,
+    candidateId UNIQUEIDENTIFIER NOT NULL,
+    appliedAt DATETIME2(0) DEFAULT SYSDATETIME(),
     stat VARCHAR(30) NOT NULL,
-    cvSnapUrl VARCHAR(255) NOT NULL,
+    cvSnapUrl VARCHAR(500) NOT NULL,
     coverLetter NVARCHAR(MAX),
+
     FOREIGN KEY (jobPostId) REFERENCES JobPosting (jobPostId),
     FOREIGN KEY (candidateId) REFERENCES Candidate (userId)
 );
 
 CREATE TABLE AppStatusHistory (
     histId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    jobAppId UNIQUEIDENTIFIER,
-    hrId UNIQUEIDENTIFIER,
+    jobAppId UNIQUEIDENTIFIER NOT NULL,
+    hrId UNIQUEIDENTIFIER NOT NULL,
     oldStat VARCHAR(30),
     newStat VARCHAR(30),
-    changeAt DATETIME2(0) DEFAULT GETDATE(),
+    changeAt DATETIME2(0) DEFAULT SYSDATETIME(),
+    
     FOREIGN KEY (jobAppId) REFERENCES JobApplication (jobAppId),
     FOREIGN KEY (hrId) REFERENCES HR (userId)
 );
 
 CREATE TABLE Interview (
     intervId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    jobAppId UNIQUEIDENTIFIER,
+    jobAppId UNIQUEIDENTIFIER NOT NULL,
     startAt DATETIME2(0) NOT NULL,
     endAt DATETIME2(0) NOT NULL,
     mode VARCHAR(30),
-    linkMeet VARCHAR(255),
-    loc NVARCHAR(255),
+    linkMeet VARCHAR(500),
+    loc NVARCHAR(150),
+
     FOREIGN KEY (jobAppId) REFERENCES JobApplication (jobAppId)
 );
 
 CREATE TABLE InterviewFeedback (
     feedbackId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    intervId UNIQUEIDENTIFIER,
-    hrId UNIQUEIDENTIFIER,
+    intervId UNIQUEIDENTIFIER NOT NULL,
+    hrId UNIQUEIDENTIFIER NOT NULL,
     score NUMERIC(4,2), -- Max 10.00 (Tổng 4 chữ số, 2 chữ số thập phân)
     cmt NVARCHAR(MAX),
-    subAt DATETIME2(0) DEFAULT GETDATE(),
+    subAt DATETIME2(0) DEFAULT SYSDATETIME(),
+
     FOREIGN KEY (intervId) REFERENCES Interview (intervId),
     FOREIGN KEY (hrId) REFERENCES HR (userId)
 );
 
 CREATE TABLE Offer (
     offerId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    jobAppId UNIQUEIDENTIFIER,
+    jobAppId UNIQUEIDENTIFIER NOT NULL,
     salary NUMERIC(15,2) NOT NULL,
     [desc] NVARCHAR(MAX),
     stat VARCHAR(30),
-    subAt DATETIME2(0) DEFAULT GETDATE(),
-    -- INT: Kiểu số nguyên 4 byte (phạm vi từ -2 tỷ đến +2 tỷ). Đủ dùng cho việc đếm version.
-    ver INT NOT NULL, 
+    subAt DATETIME2(0) DEFAULT SYSDATETIME(),
+    ver INT NOT NULL,
+    -- hrId UNIQUEIDENTIFIER NOT NULL,
+
+    --FOREIGN KEY (hrId) REFERENCES HR (hrID),
     FOREIGN KEY (jobAppId) REFERENCES JobApplication (jobAppId)
 );
 
@@ -271,12 +256,13 @@ CREATE TABLE EmailLog (
     logId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     tmplId UNIQUEIDENTIFIER,
     jobAppId UNIQUEIDENTIFIER,
-    hrId UNIQUEIDENTIFIER,
+    userId UNIQUEIDENTIFIER NOT NULL,
     content NVARCHAR(MAX) NOT NULL,
-    sentAt DATETIME2(0) DEFAULT GETDATE(),
-    rcvEmail VARCHAR(100) NOT NULL,
+    sentAt DATETIME2(0) DEFAULT SYSDATETIME(),
+    rcvEmail VARCHAR(300) NOT NULL,
+    
     FOREIGN KEY (tmplId) REFERENCES EmailTemplate (tmplId),
     FOREIGN KEY (jobAppId) REFERENCES JobApplication (jobAppId),
-    FOREIGN KEY (hrId) REFERENCES HR (userId)
+    FOREIGN KEY (userId) REFERENCES [User] (userId)
 );
 GO
