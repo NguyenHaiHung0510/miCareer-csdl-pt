@@ -1,4 +1,7 @@
-﻿--1. Đăng nhập ứng viên:
+﻿use master;
+use miCareer_DB;
+
+--1. Đăng nhập ứng viên:
 SELECT u.userId, u.userName, u.[role], c.cvUrl 
 FROM [User] u 
 JOIN Candidate c ON u.userId = c.candidateId 
@@ -40,7 +43,8 @@ WHERE jp.jobPostId = '44444444-4444-4444-4444-444444444444';
 
 --7. Nộp đơn ứng tuyển:
 INSERT INTO JobApplication (jobAppId, jobPostId, candidateId, stat, cvSnapUrl, coverLetter)
-VALUES (NEWID(), '44444444-4444-4444-4444-444444444444', '11111111-1111-1111-1111-111111111111', 'Pending', 'https://storage/cv/my_cv.pdf', N'Kính gửi bộ phận tuyển dụng, em xin phép nộp đơn...');
+VALUES (NEWID(), '44444444-4444-4444-4444-444444444444', '11111111-1111-1111-1111-111111111111',
+'Pending', 'https://storage/cv/my_cv.pdf', N'Kính gửi bộ phận tuyển dụng, em xin phép nộp đơn...');
 
 --8. Lấy danh sách các công việc đã ứng tuyển:
 SELECT ja.jobAppId, jp.title, ja.appliedAt, ja.stat

@@ -1,4 +1,7 @@
-﻿--1. Xem thống kê tổng số ứng viên theo từng Node:
+﻿use master;
+use miCareer_DB;
+
+--1. Xem thống kê tổng số ứng viên theo từng Node:
 SELECT p.nodeCode, COUNT(u.userId) AS TotalCandidates 
 FROM [User] u 
 JOIN Province p ON u.provId = p.provId 

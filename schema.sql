@@ -6,7 +6,7 @@ GO
 IF EXISTS (SELECT name FROM sys.databases WHERE name = 'miCareer_DB')
 BEGIN
     -- Ngắt kết nối các user đang dùng để tránh lỗi
-    ALTER DATABASE miCareer_DB SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+    ALTER DATABASE miCareer_DB SET MULTI_USER WITH ROLLBACK IMMEDIATE;
     DROP DATABASE miCareer_DB;
     PRINT 'Da xoa database miCareer_DB thanh cong';
 END

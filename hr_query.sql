@@ -1,11 +1,16 @@
-﻿--1. Xem danh sách tin tuyển dụng của công ty:
+﻿use master;
+use miCareer_DB;
+
+--1. Xem danh sách tin tuyển dụng của công ty:
 SELECT * FROM JobPosting 
 WHERE compId = '66666666-6666-6666-6666-666666666666' 
 ORDER BY createdAt DESC;
 
 --2. Đăng tin tuyển dụng mới:
 INSERT INTO JobPosting (jobPostId, compId, title, [desc], minSalary, maxSalary, workLoc, workMode, expAt)
-VALUES (NEWID(), '66666666-6666-6666-6666-666666666666', N'Lập trình viên Java Web', N'Nghiên cứu và phát triển hệ thống quản lý...', 15000000, 30000000, N'Tòa nhà ABC, Hải Châu, Đà Nẵng', 'onsite', '2026-04-30 23:59:59');
+VALUES (NEWID(), '66666666-6666-6666-6666-666666666666', N'Lập trình viên Java Web', 
+	N'Nghiên cứu và phát triển hệ thống quản lý...', 15000000, 30000000, N'Tòa nhà ABC, Hải Châu, Đà Nẵng', 
+	'onsite', '2026-04-30 23:59:59');
 
 --3. Gán kỹ năng yêu cầu cho Job Posting:
 INSERT INTO JobRequirement (jobPostId, skillId) 
