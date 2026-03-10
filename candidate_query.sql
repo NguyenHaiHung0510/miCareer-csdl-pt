@@ -23,14 +23,14 @@ JOIN Company c ON jp.compId = c.compId
 JOIN Province p ON c.provId = p.provId
 WHERE p.nodeCode = 'HANOI_NODE' AND jp.expAt > SYSDATETIME();
 
---5. Lọc tin tuyển dụng tại HANOI_NODE theo danh sách kỹ năng của ứng viên:
+--5. Lọc tin tuyển dụng tại HANOI_NODE theo danh sách kỹ năng của ứng viên theo tên:
 SELECT DISTINCT jp.jobPostId, jp.title 
 FROM JobPosting jp
 JOIN Company c ON jp.compId = c.compId
 JOIN Province p ON c.provId = p.provId
 JOIN JobRequirement jr ON jp.jobPostId = jr.jobPostId
 JOIN CandidateSkill cs ON jr.skillId = cs.skillId
-WHERE cs.candidateId = '11111111-1111-1111-1111-111111111111' 
+WHERE cs.candidateId = (SELECT userId from [User] WHERE [User].fName = N'Hoàng' AND [User].lName = N'Thanh Nga') 
   AND p.nodeCode = 'HANOI_NODE' 
   AND jp.expAt > SYSDATETIME();
 

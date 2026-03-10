@@ -1,9 +1,9 @@
 ﻿use master;
 use miCareer_DB;
 
---1. Xem danh sách tin tuyển dụng của công ty:
+--1. Xem danh sách tin tuyển dụng của công ty theo tên:
 SELECT * FROM JobPosting 
-WHERE compId = '66666666-6666-6666-6666-666666666666' 
+WHERE compId = (SELECT compId from Company WHERE compName = 'CloudX Central') 
 ORDER BY createdAt DESC;
 
 --2. Đăng tin tuyển dụng mới:
@@ -36,16 +36,20 @@ VALUES (NEWID(), '55555555-5555-5555-5555-555555555555', '22222222-2222-2222-222
 
 --7. Lên lịch phỏng vấn cho ứng viên:
 INSERT INTO Interview (intervId, jobAppId, startAt, endAt, mode, linkMeet, loc)
-VALUES (NEWID(), '55555555-5555-5555-5555-555555555555', '2026-03-10 09:00:00', '2026-03-10 10:30:00', 'online', 'https://meet.google.com/abc-xyz', NULL);
+VALUES (NEWID(), '55555555-5555-5555-5555-555555555555', '2026-03-10 09:00:00', '2026-03-10 10:30:00', 'online',
+'https://meet.google.com/abc-xyz', NULL);
 
 --8. Thêm phiếu đánh giá sau phỏng vấn:
 INSERT INTO InterviewFeedback (feedbackId, intervId, hrId, score, cmt)
-VALUES (NEWID(), '88888888-8888-8888-8888-888888888888', '22222222-2222-2222-2222-222222222222', 8.5, N'Ứng viên nắm vững kiến thức về Java Servlets, phù hợp dự án.');
+VALUES (NEWID(), '88888888-8888-8888-8888-888888888888', '22222222-2222-2222-2222-222222222222',
+8.5, N'Ứng viên nắm vững kiến thức về Java Servlets, phù hợp dự án.');
 
 --9. Tạo một Offer mới cho ứng viên:
 INSERT INTO Offer (offerId, jobAppId, salary, [desc], stat, ver, hrId)
-VALUES (NEWID(), '55555555-5555-5555-5555-555555555555', 20000000, N'Thưởng tháng 13, cấp Mac', 'Pending', 1, '22222222-2222-2222-2222-222222222222');
+VALUES (NEWID(), '55555555-5555-5555-5555-555555555555', 20000000, N'Thưởng tháng 13, cấp Mac',
+'Pending', 1, '22222222-2222-2222-2222-222222222222');
 
 --10. HR gửi Email (Lưu vào EmailLog):
 INSERT INTO EmailLog (logId, tmplId, jobAppId, userId, content, rcvEmail)
-VALUES (NEWID(), '99999999-9999-9999-9999-999999999999', '55555555-5555-5555-5555-555555555555', '22222222-2222-2222-2222-222222222222', N'Chào bạn, chúng tôi rất vui mừng thông báo...', 'hung.nguyen@email.com');
+VALUES (NEWID(), '99999999-9999-9999-9999-999999999999', '55555555-5555-5555-5555-555555555555',
+'22222222-2222-2222-2222-222222222222', N'Chào bạn, chúng tôi rất vui mừng thông báo...', 'hung.nguyen@email.com');

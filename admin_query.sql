@@ -39,7 +39,8 @@ WHERE el.sentAt BETWEEN '2026-03-01 00:00:00' AND '2026-03-31 23:59:59';
 
 --7. Tạo một Email Template mới chuẩn hóa:
 INSERT INTO EmailTemplate (tmplId, typeId, subj, body, [desc])
-VALUES (NEWID(), '00000000-0000-0000-0000-000000000000', N'Thư mời nhận việc chính thức', N'Chào bạn, công ty xin gửi offer...', N'Mẫu email gửi offer chính thức từ hệ thống');
+VALUES (NEWID(), '00000000-0000-0000-0000-000000000000', N'Thư mời nhận việc chính thức',
+N'Chào bạn, công ty xin gửi offer...', N'Mẫu email gửi offer chính thức từ hệ thống');
 
 --8. Quản lý phân quyền: Thêm một quyền cho Role:
 INSERT INTO RolePermission (roleId, permId) 
