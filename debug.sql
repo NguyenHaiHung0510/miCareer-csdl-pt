@@ -11,6 +11,7 @@ FROM sys.dm_exec_sessions
 WHERE database_id = DB_ID('miCareer_DB');
 -- Nếu cần dừng session nào đó, dùng lệnh 'KILL {id}'
 KILL 111
+
 -- 2
 SELECT 
     name AS [Tên Database], 
